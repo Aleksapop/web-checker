@@ -3,6 +3,20 @@ import time
 from urllib.parse import urlparse
 
 
+def normalize_url(url):
+    url = url.strip()
+
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = "https://" + url
+
+    parsed = urlparse(url)
+
+    if not parsed.netloc.startswith("www."):
+        url = parsed.scheme + "://www." + parsed.netloc + parsed.path
+
+    return url
+
+
 def validate_url(url):
     parsed = urlparse(url)
     return all([parsed.scheme, parsed.netloc])
@@ -73,27 +87,34 @@ def main():
 
     print("Website Status Checker\n")
 
-    user_input = input("Enter websites separated by commas:\n")
+    while True:
+        user_input = input("Enter websites separated by commas:\n")
 
-    urls = [u.strip() for u in user_input.split(",")]
+        urls = [normalize_url(u.strip()) for u in user_input.split(",")]
 
-    results = []
+        results = []
 
-    print("\nChecking websites...\n")
+        print("\nChecking websites...\n")
 
-    for url in urls:
+        for url in urls:
 
-        if not validate_url(url):
-            print(f"{url} -> INVALID URL")
-            continue
+            if not validate_url(url):
+                print(f"{url} -> INVALID URL")
+                continue
 
-        result = check_website(url)
+            result = check_website(url)
 
-        results.append(result)
+            results.append(result)
 
-        print_result(result)
+            print_result(result)
 
-    print_summary(results)
+        print_summary(results)
+
+        again = input("\nDo you want to check more websites? (y/n): ").lower()
+
+        if again != "y":
+            print("Exiting program...")
+            break
 
 
 if __name__ == "__main__":
